@@ -19,7 +19,7 @@ struct UnmarbleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            GalleryView()
+            MainTabView()
                 .environment(userStore)
         }
     }

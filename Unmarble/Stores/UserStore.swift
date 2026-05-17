@@ -100,16 +100,22 @@ final class UserStore {
             yourself: [
                 .mock(id: "y1", category: "yourself"),
                 .mock(id: "y2", category: "yourself", faved: true),
-                .mock(id: "y3", category: "yourself")
+                .mock(id: "y3", category: "yourself"),
+                .mock(id: "y4", category: "yourself", faved: true),
+                .mock(id: "y5", category: "yourself")
             ],
             clothing: [
                 .mock(id: "c1", category: "clothing"),
                 .mock(id: "c2", category: "clothing"),
-                .mock(id: "c3", category: "clothing", faved: true)
+                .mock(id: "c3", category: "clothing", faved: true),
+                .mock(id: "c4", category: "clothing"),
+                .mock(id: "c5", category: "clothing", faved: true)
             ],
             design: [
                 .mock(id: "d1", category: "design"),
-                .mock(id: "d2", category: "design")
+                .mock(id: "d2", category: "design"),
+                .mock(id: "d3", category: "design"),
+                .mock(id: "d4", category: "design", faved: true)
             ]
         )
         userLimits = UserLimits(storageLeft: 100, designsLeft: 20)
