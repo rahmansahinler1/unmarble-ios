@@ -95,7 +95,23 @@ final class UserStore {
     }
 
     // MARK: - Mock data seeding (used by .preview and live app until the API is wired up)
-    func seedMockGallery() {
+    func seedMockData() {
+        userId = "mock_user_1"
+        userLoggedIn = true
+        userCred = UserCred(
+            name: "Rahman",
+            surname: "Şahinler",
+            email: "rahmansahinler1@gmail.com",
+            type: "trial",
+            pictureUrl: "",
+            nextRenewalDate: nil,
+            subscriptionStatus: "none",
+            subscriptionEndsAt: nil,
+            daysUntilExpiry: nil,
+            daysSinceExpiry: nil,
+            userStatus: "active"
+        )
+        userLimits = UserLimits(storageLeft: 8, designsLeft: 16)
         previewImages = PreviewImages(
             yourself: [
                 .mock(id: "y1", category: "yourself"),
@@ -118,27 +134,12 @@ final class UserStore {
                 .mock(id: "d4", category: "design", faved: true)
             ]
         )
-        userLimits = UserLimits(storageLeft: 100, designsLeft: 20)
     }
 
     // MARK: - Preview helper (SwiftUI Previews)
     static var preview: UserStore {
         let store = UserStore()
-        store.userLoggedIn = true
-        store.userCred = UserCred(
-            name: "Rahman",
-            surname: "Sahinler",
-            email: "rahman@unmarble.com",
-            type: "premium",
-            pictureUrl: "",
-            nextRenewalDate: nil,
-            subscriptionStatus: "active",
-            subscriptionEndsAt: nil,
-            daysUntilExpiry: nil,
-            daysSinceExpiry: nil,
-            userStatus: "active"
-        )
-        store.seedMockGallery()
+        store.seedMockData()
         return store
     }
 }

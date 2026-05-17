@@ -13,7 +13,7 @@ struct UnmarbleApp: App {
 
     init() {
         let store = UserStore()
-        store.seedMockGallery()
+        store.seedMockData()
         _userStore = State(initialValue: store)
     }
 
