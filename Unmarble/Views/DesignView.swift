@@ -14,15 +14,18 @@ struct DesignView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+            Spacer(minLength: 0)
             selectionRow
-                .frame(maxHeight: .infinity)
-            arrowAndResultLabel
+            Color.clear.frame(height: 6)
+            Image(systemName: "arrow.turn.right.down")
+                .font(.system(size: 18))
+                .foregroundStyle(.secondary)
+            Color.clear.frame(height: 6)
             resultCard
                 .aspectRatio(4.0/5.0, contentMode: .fit)
+                .frame(maxWidth: .infinity, maxHeight: 360)
                 .padding(.horizontal, 1)
-            resultActions
-                .padding(.top, 6)
-                .padding(.bottom, 6)
+            Spacer(minLength: 0)
         }
     }
 
@@ -32,24 +35,23 @@ struct DesignView: View {
             .font(.title.bold())
             .frame(maxWidth: .infinity)
             .padding(.top, 8)
-            .padding(.bottom, 10)
     }
 
     private var selectionRow: some View {
-        HStack(alignment: .center, spacing: 12) {
-            selectionColumn(
-                label: "Yourself",
-                symbol: "person.fill",
+        HStack(alignment: .center, spacing: 4) {
+            selectionCard(
                 slot: "yourself",
+                badgeLabel: "Yourself",
+                badgeSymbol: "person.fill",
                 selection: userStore.gallerySelections.yourself
             )
             Image(systemName: "plus")
-                .font(.title3)
+                .font(.body)
                 .foregroundStyle(.secondary)
-            selectionColumn(
-                label: "Clothing",
-                symbol: "tshirt.fill",
+            selectionCard(
                 slot: "clothing",
+                badgeLabel: "Clothing",
+                badgeSymbol: "tshirt.fill",
                 selection: userStore.gallerySelections.clothing
             )
         }
@@ -57,38 +59,13 @@ struct DesignView: View {
     }
 
     @ViewBuilder
-    private func selectionColumn(
-        label: String,
-        symbol: String,
+    private func selectionCard(
         slot: String,
+        badgeLabel: String,
+        badgeSymbol: String,
         selection: GallerySelection?
     ) -> some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 4) {
-                Image(systemName: symbol)
-                Text(label).bold()
-            }
-            .font(.subheadline)
-
-            selectionCard(selection: selection)
-                .frame(maxHeight: .infinity)
-
-            Button {
-                userStore.setGallerySelection(slot: slot, selection: nil)
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .font(.system(size: 14))
-                    .foregroundStyle(selection == nil ? Color.secondary.opacity(0.3) : Color.secondary)
-            }
-            .buttonStyle(.plain)
-            .disabled(selection == nil)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    private func selectionCard(selection: GallerySelection?) -> some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(
                     Color.secondary.opacity(0.5),
@@ -99,18 +76,27 @@ struct DesignView: View {
                 placeholderForSelection(selection)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             } else {
-                HStack(spacing: 4) {
-                    Image(systemName: "hand.point.up.left")
-                    Text("Click to select")
-                }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                clickToSelectLabel
+                badge(label: badgeLabel, symbol: badgeSymbol)
+                    .padding(8)
             }
         }
+        .frame(maxWidth: .infinity)
+        .aspectRatio(4.0/5.0, contentMode: .fit)
         .contentShape(Rectangle())
         .onTapGesture {
-            print("\(selection == nil ? "select" : "replace") tapped (stub)")
+            print("\(slot) tapped (stub)")
         }
+    }
+
+    private var clickToSelectLabel: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "hand.point.up.left")
+            Text("Click to select")
+        }
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     @ViewBuilder
@@ -118,40 +104,23 @@ struct DesignView: View {
         ZStack {
             placeholderColor(for: selection.category)
             Image(systemName: placeholderSymbol(for: selection.category))
-                .font(.system(size: 44))
+                .font(.system(size: 50))
                 .foregroundStyle(.white.opacity(0.9))
         }
-    }
-
-    private var arrowAndResultLabel: some View {
-        VStack(spacing: 2) {
-            Image(systemName: "arrow.turn.right.down")
-                .font(.system(size: 18))
-                .foregroundStyle(.secondary)
-            HStack(spacing: 4) {
-                Image(systemName: "camera.fill")
-                Text("Result").bold()
-            }
-            .font(.subheadline)
-        }
-        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var resultCard: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(
                     canDesign ? Color.accentColor.opacity(0.6) : Color.secondary.opacity(0.5),
                     style: StrokeStyle(lineWidth: 1.2, dash: [6, 5])
                 )
 
-            HStack(spacing: 6) {
-                Image(systemName: canDesign ? "hand.tap.fill" : "arrow.up.circle.fill")
-                Text(canDesign ? "Click to Design" : "Select Pictures")
-                    .bold()
-            }
-            .font(.subheadline)
-            .foregroundStyle(.primary)
+            resultCenterLabel
+            badge(label: "Result", symbol: "camera.fill")
+                .padding(8)
         }
         .contentShape(Rectangle())
         .onTapGesture {
@@ -159,25 +128,28 @@ struct DesignView: View {
         }
     }
 
-    private var resultActions: some View {
-        HStack(spacing: 28) {
-            Button {
-                print("undo tapped (stub)")
-            } label: {
-                Image(systemName: "arrow.uturn.left")
-                    .font(.system(size: 16))
-                    .foregroundStyle(Color.secondary.opacity(0.4))
-            }
-            Button {
-                print("download tapped (stub)")
-            } label: {
-                Image(systemName: "arrow.down")
-                    .font(.system(size: 16))
-                    .foregroundStyle(Color.secondary.opacity(0.4))
-            }
+    private var resultCenterLabel: some View {
+        HStack(spacing: 6) {
+            Image(systemName: canDesign ? "hand.tap.fill" : "arrow.up.circle.fill")
+            Text(canDesign ? "Click to Design" : "Select Pictures")
+                .bold()
         }
-        .buttonStyle(.plain)
-        .disabled(true)
+        .font(.subheadline)
+        .foregroundStyle(.primary)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func badge(label: String, symbol: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: symbol)
+            Text(label)
+        }
+        .font(.caption2.weight(.semibold))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.black.opacity(0.55))
+        .foregroundStyle(.white)
+        .clipShape(Capsule())
     }
 
     // MARK: - Action methods
