@@ -3,6 +3,7 @@ import SwiftUI
 struct MainTabView: View {
     // MARK: - Local state
     @State private var selectedTab: AppTab = .gallery
+    @State private var dragOffset: CGFloat = 0
 
     // MARK: - Body
     var body: some View {
@@ -21,10 +22,10 @@ struct MainTabView: View {
                 DesignView().frame(width: proxy.size.width)
                 ProfileView().frame(width: proxy.size.width)
             }
-            .offset(x: -CGFloat(tabIndex) * proxy.size.width)
+            .offset(x: -CGFloat(tabIndex) * proxy.size.width + dragOffset)
+            .simultaneousGesture(swipeGesture)
         }
         .clipped()
-        .simultaneousGesture(swipeGesture)
     }
 
     private var tabBar: some View {
@@ -52,14 +53,26 @@ struct MainTabView: View {
 
     // MARK: - Gestures
     private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 30)
+        DragGesture(minimumDistance: 20)
+            .onChanged { value in
+                let h = value.translation.width
+                let v = value.translation.height
+                // Only follow horizontal drags; let vertical scrolling stay untouched.
+                guard abs(h) > abs(v) else { return }
+                dragOffset = rubberBanded(h)
+            }
             .onEnded { value in
                 let h = value.translation.width
                 let v = value.translation.height
-                // Only act on clearly-horizontal swipes; otherwise let scrolling handle it.
-                guard abs(h) > abs(v) else { return }
-                if h < -80 { advance(forward: true) }
-                else if h > 80 { advance(forward: false) }
+                let isHorizontal = abs(h) > abs(v)
+
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    dragOffset = 0
+                    if isHorizontal {
+                        if h < -80 { advance(forward: true) }
+                        else if h > 80 { advance(forward: false) }
+                    }
+                }
             }
     }
 
@@ -75,14 +88,20 @@ struct MainTabView: View {
         guard let i = cases.firstIndex(of: selectedTab) else { return }
         let next = forward ? i + 1 : i - 1
         guard cases.indices.contains(next) else { return }
-        withAnimation(.easeInOut(duration: 0.25)) {
-            selectedTab = cases[next]
-        }
+        selectedTab = cases[next]
     }
 
     // MARK: - Helpers
     private var tabIndex: Int {
         AppTab.allCases.firstIndex(of: selectedTab) ?? 0
+    }
+
+    private func rubberBanded(_ raw: CGFloat) -> CGFloat {
+        let last = AppTab.allCases.count - 1
+        // Resist at the first page when dragging right, and at the last page when dragging left.
+        if tabIndex == 0 && raw > 0 { return raw * 0.3 }
+        if tabIndex == last && raw < 0 { return raw * 0.3 }
+        return raw
     }
 }
 

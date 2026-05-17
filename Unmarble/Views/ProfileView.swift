@@ -14,14 +14,11 @@ struct ProfileView: View {
 
     // MARK: - View builders
     private var header: some View {
-        HStack {
-            Text("Profile")
-                .font(.largeTitle.bold())
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        Text("Profile")
+            .font(.title.bold())
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
     }
 }
 

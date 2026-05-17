@@ -4,8 +4,6 @@ struct GalleryView: View {
     // MARK: - Local state
     @State private var selectedFilter: GalleryFilter = .all
     @State private var deleteConfirmId: String? = nil
-    @State private var localYourselfSelection: GallerySelection? = nil
-    @State private var localClothingSelection: GallerySelection? = nil
 
     // MARK: - Stores
     @Environment(UserStore.self) private var userStore
@@ -45,14 +43,11 @@ struct GalleryView: View {
 
     // MARK: - View builders
     private var header: some View {
-        HStack {
-            Text("Gallery")
-                .font(.largeTitle.bold())
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        Text("Gallery")
+            .font(.title.bold())
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
     }
 
     private var filterRow: some View {
@@ -231,8 +226,12 @@ struct GalleryView: View {
     private func deleteImage(id: String, category: String) {
         userStore.removePreviewImage(category: category, id: id)
         deleteConfirmId = nil
-        if localYourselfSelection?.id == id { localYourselfSelection = nil }
-        if localClothingSelection?.id == id { localClothingSelection = nil }
+        if userStore.gallerySelections.yourself?.id == id {
+            userStore.setGallerySelection(slot: "yourself", selection: nil)
+        }
+        if userStore.gallerySelections.clothing?.id == id {
+            userStore.setGallerySelection(slot: "clothing", selection: nil)
+        }
     }
 
     private func toggleFav(image: PreviewImage) {
@@ -241,24 +240,23 @@ struct GalleryView: View {
 
     private func handleImageClick(_ image: PreviewImage) {
         let slot = image.category == "clothing" ? "clothing" : "yourself"
-        if slot == "clothing" {
-            if localClothingSelection?.id == image.id {
-                localClothingSelection = nil
-            } else {
-                localClothingSelection = GallerySelection(id: image.id, category: image.category)
-            }
+        let current = slot == "clothing"
+            ? userStore.gallerySelections.clothing
+            : userStore.gallerySelections.yourself
+        if current?.id == image.id {
+            userStore.setGallerySelection(slot: slot, selection: nil)
         } else {
-            if localYourselfSelection?.id == image.id {
-                localYourselfSelection = nil
-            } else {
-                localYourselfSelection = GallerySelection(id: image.id, category: image.category)
-            }
+            userStore.setGallerySelection(
+                slot: slot,
+                selection: GallerySelection(id: image.id, category: image.category)
+            )
         }
     }
 
     // MARK: - Helpers
     private func isSelected(_ image: PreviewImage) -> Bool {
-        localYourselfSelection?.id == image.id || localClothingSelection?.id == image.id
+        userStore.gallerySelections.yourself?.id == image.id
+            || userStore.gallerySelections.clothing?.id == image.id
     }
 
     private func tagged(_ image: PreviewImage, _ category: String) -> PreviewImage {
