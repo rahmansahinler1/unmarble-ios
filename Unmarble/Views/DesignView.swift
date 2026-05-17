@@ -14,7 +14,7 @@ struct DesignView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Spacer(minLength: 0)
+            Color.clear.frame(height: 24)
             selectionRow
             Color.clear.frame(height: 6)
             Image(systemName: "arrow.turn.right.down")
@@ -23,9 +23,9 @@ struct DesignView: View {
             Color.clear.frame(height: 6)
             resultCard
                 .aspectRatio(4.0/5.0, contentMode: .fit)
-                .frame(maxWidth: .infinity, maxHeight: 360)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.horizontal, 1)
-            Spacer(minLength: 0)
+            Color.clear.frame(height: 24)
         }
     }
 
